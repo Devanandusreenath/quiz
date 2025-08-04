@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buzzer Quiz Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .login-container, .admin-panel, .player-panel, .game-monitor {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            margin: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #26de81, #20bf6b);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #fd79a8, #e84393);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .question-item, .player-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 10px;
+            border-left: 4px solid #FFD700;
+        }
+        
+        .buzzer {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            color: white;
+            margin: 1rem;
+            background: linear-gradient(45deg, #4dabf7, #339af0);
+        }
+        
+        .buzzer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
+        
+        .buzzer:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .score-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .score-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .winner {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            font-weight: bold;
+            animation: glow 2s ease-in-out infinite alternate;
+            transform: scale(1.05);
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #FFD700; }
+            to { box-shadow: 0 0 30px #FFD700; }
+        }
+        
+        .timer {
+            font-size: 2rem;
+            text-align: center;
+            color: #FFD700;
+            margin: 1rem 0;
+        }
+        
+        .timer.warning {
+            color: #ff6b6b;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .game-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .monitor-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .buzz-log {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .buzz-entry {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .buzz-entry.correct {
+            border-left: 4px solid #26de81;
+        }
+        
+        .buzz-entry.incorrect {
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .question-display {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .option-btn {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #FFD700;
+        }
+        
+        .option-btn.selected {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #FFD700;
+        }
+        
+        .leaderboard {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .flex-row > * {
+            flex: 1;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="login-container">
+            <h1>🎯 Buzzer Quiz System</h1>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="username" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            <button class="btn-primary" onclick="login()">Login</button>
+            <div style="text-align: center; margin-top: 1rem; opacity: 0.7;">
+                <small>Enter your credentials to access the system</small>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel hidden">
+            <button class="btn-danger logout-btn" onclick="logout()">Logout</button>
+            <h1>Admin Dashboard</h1>
+            
+            <div class="tab-buttons">
+                <button class="btn-primary" onclick="showTab('quizSetup')">Quiz Setup</button>
+                <button class="btn-secondary" onclick="showTab('playerManagement')">Player Management</button>
+                <button class="btn-warning" onclick="showTab('gameControl')">Game Control</button>
+                <button class="btn-primary" onclick="showTab('monitor')">Live Monitor</button>
+            </div>
+
+            <!-- Quiz Setup Tab -->
+            <div id="quizSetup" class="tab-content active">
+                <h2>Quiz Setup</h2>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Quiz Name:</label>
+                        <input type="text" id="quizName" placeholder="Enter quiz name">
+                    </div>
+                    <div class="form-group">
+                        <label>Timer per Question (seconds):</label>
+                        <input type="number" id="questionTimer" value="30" min="10" max="120">
+                    </div>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Points for Correct Answer:</label>
+                        <input type="number" id="correctPoints" value="10" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Points for Wrong Answer:</label>
+                        <input type="number" id="wrongPoints" value="-5">
+                    </div>
+                </div>
+                
+                <h3>Add Questions</h3>
+                <div class="form-group">
+                    <label>Question:</label>
+                    <textarea id="questionText" rows="3" placeholder="Enter your question"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Question Type:</label>
+                    <select id="questionType" onchange="toggleOptions()">
+                        <option value="text">Text Answer</option>
+                        <option value="mcq">Multiple Choice</option>
+                    </select>
+                </div>
+                <div id="mcqOptions" class="hidden">
+                    <div class="form-group">
+                        <label>Option A:</label>
+                        <input type="text" id="optionA" placeholder="Option A">
+                    </div>
+                    <div class="form-group">
+                        <label>Option B:</label>
+                        <input type="text" id="optionB" placeholder="Option B">
+                    </div>
+                    <div class="form-group">
+                        <label>Option C:</label>
+                        <input type="text" id="optionC" placeholder="Option C">
+                    </div>
+                    <div class="form-group">
+                        <label>Option D:</label>
+                        <input type="text" id="optionD" placeholder="Option D">
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Option:</label>
+                        <select id="correctOption">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="textAnswer" class="form-group">
+                    <label>Correct Answer:</label>
+                    <input type="text" id="correctAnswer" placeholder="Enter correct answer">
+                </div>
+                <button class="btn-primary" onclick="addQuestion()">Add Question</button>
+                
+                <div id="questionsList"></div>
+            </div>
+
+            <!-- Player Management Tab -->
+            <div id="playerManagement" class="tab-content">
+                <h2>Player Management</h2>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Player Name:</label>
+                        <input type="text" id="playerName" placeholder="Enter player name">
+                    </div>
+                    <div class="form-group">
+                        <label>Player Username:</label>
+                        <input type="text" id="playerUsername" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label>Player Password:</label>
+                        <input type="text" id="playerPassword" placeholder="Enter password">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+                
+                <div id="playersList"></div>
+            </div>
+
+            <!-- Game Control Tab -->
+            <div id="gameControl" class="tab-content">
+                <h2>Game Control</h2>
+                <div class="game-status" id="adminGameStatus">Game Not Started</div>
+                <div class="flex-row">
+                    <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+                    <button class="btn-secondary" onclick="nextQuestion()">Next Question</button>
+                    <button class="btn-warning" onclick="pauseQuiz()">Pause Quiz</button>
+                    <button class="btn-danger" onclick="endQuiz()">End Quiz</button>
+                </div>
+                <div class="timer" id="adminTimer">--:--</div>
+            </div>
+
+            <!-- Live Monitor Tab -->
+            <div id="monitor" class="tab-content">
+                <h2>Live Game Monitor</h2>
+                <div class="monitor-panel">
+                    <div>
+                        <h3>Current Question</h3>
+                        <div id="monitorQuestion" class="question-display">No active question</div>
+                        <div id="monitorOptions"></div>
+                    </div>
+                    <div>
+                        <h3>Buzz Log</h3>
+                        <div id="buzzLog" class="buzz-log"></div>
+                    </div>
+                </div>
+                <div class="score-board" id="monitorScores"></div>
+            </div>
+        </div>
+
+        <!-- Player Panel -->
+        <div id="playerPanel" class="player-panel hidden">
+            <button class="btn-danger logout-btn" onclick="logout()">Logout</button>
+            <h1>Player Dashboard</h1>
+            <div class="game-status" id="playerGameStatus">Waiting for game to start...</div>
+            
+            <div id="gameArea" class="hidden">
+                <div class="timer" id="playerTimer">--:--</div>
+                <div id="currentQuestion" class="question-display">Waiting for question...</div>
+                <div id="questionOptions" class="options-container"></div>
+                
+                <div style="text-align: center;">
+                    <button class="buzzer" id="playerBuzzer" onclick="buzz()" disabled>
+                        🔔<br>BUZZ!
+                    </button>
+                </div>
+                
+                <div id="answerSection" class="hidden">
+                    <div class="form-group">
+                        <label>Your Answer:</label>
+                        <input type="text" id="playerAnswer" placeholder="Enter your answer">
+                    </div>
+                    <button class="btn-primary" onclick="submitAnswer()">Submit Answer</button>
+                </div>
+                
+                <div class="score-board">
+                    <div class="score-card">
+                        <h3 id="playerNameDisplay">Player</h3>
+                        <div class="timer" id="playerScore">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="leaderboard" class="leaderboard hidden">
+                <h2>🏆 Final Leaderboard 🏆</h2>
+                <div id="leaderboardList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State Management
+        let gameState = {
+            isAdmin: false,
+            currentUser: null,
+            quiz: {
+                name: '',
+                questions: [],
+                players: [],
+                currentQuestion: -1,
+                isActive: false,
+                isPaused: false,
+                timer: 30,
+                correctPoints: 10,
+                wrongPoints: -5
+            },
+            playerScores: {},
+            buzzedPlayer: null,
+            timerInterval: null,
+            timeLeft: 0
+        };
+
+        // Admin credentials (in real app, this would be server-side)
+        const adminCredentials = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        // Login System
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                alert('Please enter both username and password!');
+                return;
+            }
+
+            // First check if it's admin credentials
+            if (username === adminCredentials.username && password === adminCredentials.password) {
+                gameState.isAdmin = true;
+                gameState.currentUser = { username, role: 'admin', name: 'Administrator' };
+                showAdminPanel();
+                return;
+            }
+            
+            // Then check if it's a registered player
+            const player = gameState.quiz.players.find(p => p.username === username && p.password === password);
+            if (player) {
+                gameState.isAdmin = false;
+                gameState.currentUser = player;
+                showPlayerPanel();
+                return;
+            }
+            
+            // If neither admin nor registered player
+            alert('Invalid credentials! Please check your username and password.');
+        }
+
+        function logout() {
+            gameState.currentUser = null;
+            gameState.isAdmin = false;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('playerPanel').classList.add('hidden');
+            
+            // Clear form fields
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            updatePlayersDisplay();
+            updateQuestionsDisplay();
+        }
+
+        function showPlayerPanel() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('playerPanel').classList.remove('hidden');
+            document.getElementById('playerNameDisplay').textContent = gameState.currentUser.name;
+            
+            // Initialize player score
+            if (!gameState.playerScores[gameState.currentUser.username]) {
+                gameState.playerScores[gameState.currentUser.username] = 0;
+            }
+            updatePlayerScore();
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Question Management
+        function toggleOptions() {
+            const questionType = document.getElementById('questionType').value;
+            const mcqOptions = document.getElementById('mcqOptions');
+            const textAnswer = document.getElementById('textAnswer');
+            
+            if (questionType === 'mcq') {
+                mcqOptions.classList.remove('hidden');
+                textAnswer.classList.add('hidden');
+            } else {
+                mcqOptions.classList.add('hidden');
+                textAnswer.classList.remove('hidden');
+            }
+        }
+
+        function addQuestion() {
+            const questionText = document.getElementById('questionText').value;
+            const questionType = document.getElementById('questionType').value;
+            
+            if (!questionText.trim()) {
+                alert('Please enter a question!');
+                return;
+            }
+
+            const question = {
+                id: Date.now(),
+                question: questionText,
+                type: questionType
+            };
+
+            if (questionType === 'mcq') {
+                question.options = {
+                    A: document.getElementById('optionA').value,
+                    B: document.getElementById('optionB').value,
+                    C: document.getElementById('optionC').value,
+                    D: document.getElementById('optionD').value
+                };
+                question.correctAnswer = document.getElementById('correctOption').value;
+            } else {
+                question.correctAnswer = document.getElementById('correctAnswer').value;
+            }
+
+            gameState.quiz.questions.push(question);
+            updateQuestionsDisplay();
+            clearQuestionForm();
+        }
+
+        function clearQuestionForm() {
+            document.getElementById('questionText').value = '';
+            document.getElementById('optionA').value = '';
+            document.getElementById('optionB').value = '';
+            document.getElementById('optionC').value = '';
+            document.getElementById('optionD').value = '';
+            document.getElementById('correctAnswer').value = '';
+        }
+
+        function updateQuestionsDisplay() {
+            const container = document.getElementById('questionsList');
+            container.innerHTML = '<h3>Questions (' + gameState.quiz.questions.length + ')</h3>';
+            
+            gameState.quiz.questions.forEach((q, index) => {
+                const div = document.createElement('div');
+                div.className = 'question-item';
+                div.innerHTML = `
+                    <strong>Q${index + 1}:</strong> ${q.question}<br>
+                    <small>Type: ${q.type === 'mcq' ? 'Multiple Choice' : 'Text Answer'}</small>
+                    <button class="btn-danger" onclick="removeQuestion(${q.id})" style="float: right;">Remove</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeQuestion(id) {
+            gameState.quiz.questions = gameState.quiz.questions.filter(q => q.id !== id);
+            updateQuestionsDisplay();
+        }
+
+        // Player Management
+        function addPlayer() {
+            const name = document.getElementById('playerName').value;
+            const username = document.getElementById('playerUsername').value;
+            const password = document.getElementById('playerPassword').value;
+            
+            if (!name.trim() || !username.trim() || !password.trim()) {
+                alert('Please fill all player fields!');
+                return;
+            }
+
+            // Check if username already exists
+            if (gameState.quiz.players.find(p => p.username === username)) {
+                alert('Username already exists!');
+                return;
+            }
+
+            const player = {
+                id: Date.now(),
+                name: name,
+                username: username,
+                password: password
+            };
+
+            gameState.quiz.players.push(player);
+            gameState.playerScores[username] = 0;
+            updatePlayersDisplay();
+            clearPlayerForm();
+        }
+
+        function clearPlayerForm() {
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerUsername').value = '';
+            document.getElementById('playerPassword').value = '';
+        }
+
+        function updatePlayersDisplay() {
+            const container = document.getElementById('playersList');
+            container.innerHTML = '<h3>Registered Players (' + gameState.quiz.players.length + ')</h3>';
+            
+            gameState.quiz.players.forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'player-item';
+                div.innerHTML = `
+                    <strong>${player.name}</strong> (${player.username})<br>
+                    <small>Password: ${player.password}</small>
+                    <button class="btn-danger" onclick="removePlayer(${player.id})" style="float: right;">Remove</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removePlayer(id) {
+            const player = gameState.quiz.players.find(p => p.id === id);
+            if (player) {
+                delete gameState.playerScores[player.username];
+                gameState.quiz.players = gameState.quiz.players.filter(p => p.id !== id);
+                updatePlayersDisplay();
+            }
+        }
+
+        // Game Control
+        function startQuiz() {
+            if (gameState.quiz.questions.length === 0) {
+                alert('Please add questions before starting the quiz!');
+                return;
+            }
+            
+            if (gameState.quiz.players.length === 0) {
+                alert('Please add players before starting the quiz!');
+                return;
+            }
+
+            gameState.quiz.isActive = true;
+            gameState.quiz.currentQuestion = -1;
+            gameState.quiz.timer = parseInt(document.getElementById('questionTimer').value);
+            gameState.quiz.correctPoints = parseInt(document.getElementById('correctPoints').value);
+            gameState.quiz.wrongPoints = parseInt(document.getElementById('wrongPoints').value);
+            
+            // Initialize all player scores
+            gameState.quiz.players.forEach(player => {
+                gameState.playerScores[player.username] = 0;
+            });
+            
+            updateGameStatus('Quiz Started! Click "Next Question" to begin.');
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (!gameState.quiz.isActive) return;
+            
+            gameState.quiz.currentQuestion++;
+            
+            if (gameState.quiz.currentQuestion >= gameState.quiz.questions.length) {
+                endQuiz();
+                return;
+            }
+            
+            const question = gameState.quiz.questions[gameState.quiz.currentQuestion];
+            gameState.buzzedPlayer = null;
+            gameState.timeLeft = gameState.quiz.timer;
+            
+            displayCurrentQuestion(question);
+            startTimer();
+            enableBuzzers();
+            updateGameStatus(`Question ${gameState.quiz.currentQuestion + 1} of ${gameState.quiz.questions.length}`);
+        }
+
+        function pauseQuiz() {
+            gameState.quiz.isPaused = !gameState.quiz.isPaused;
+            if (gameState.quiz.isPaused) {
+                clearInterval(gameState.timerInterval);
+                updateGameStatus('Quiz Paused');
+            } else {
+                startTimer();
+                updateGameStatus('Quiz Resumed');
+            }
+        }
+
+        function endQuiz() {
+            gameState.quiz.isActive = false;
+            clearInterval(gameState.timerInterval);
+            updateGameStatus('Quiz Ended');
+            showLeaderboard();
+        }
+
+        function startTimer() {
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                if (gameState.quiz.isPaused) return;
+                
+                gameState.timeLeft--;
+                updateTimerDisplay();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(gameState.timeLeft / 60);
+            const seconds = gameState.timeLeft % 60;
+            const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('adminTimer').textContent = display;
+            document.getElementById('playerTimer').textContent = display;
+            
+            // Add warning class when time is low
+            if (gameState.timeLeft <= 10) {
+                document.getElementById('adminTimer').classList.add('warning');
+                document.getElementById('playerTimer').classList.add('warning');
+            } else {
+                document.getElementById('adminTimer').classList.remove('warning');
+                document.getElementById('playerTimer').classList.remove('warning');
+            }
+        }
+
+        function timeUp() {
+            updateGameStatus('Time\'s up! Moving to next question...');
+            disableBuzzers();
+            setTimeout(nextQuestion, 2000);
+        }
+
+        // Buzzer System
+        function buzz() {
+            if (!gameState.quiz.isActive || gameState.buzzedPlayer || gameState.quiz.isPaused) return;
+            
+            gameState.buzzedPlayer = gameState.currentUser.username;
+            clearInterval(gameState.timerInterval);
+            
+            // Log the buzz
+            addBuzzLog(gameState.currentUser.name + ' buzzed in!');
+            
+            // Show answer section for player
+            document.getElementById('answerSection').classList.remove('hidden');
+            document.getElementById('playerBuzzer').disabled = true;
+            
+            updateGameStatus(`${gameState.currentUser.name} buzzed in! Waiting for answer...`);
+        }
+
+        function submitAnswer() {
+            const playerAnswer = document.getElementById('playerAnswer').value.trim();
+            if (!playerAnswer) {
+                alert('Please enter an answer!');
+                return;
+            }
+            
+            const currentQ = gameState.quiz.questions[gameState.quiz.currentQuestion];
+            let isCorrect = false;
+            
+            if (currentQ.type === 'mcq') {
+                // For MCQ, player should select from options, but we'll accept text input too
+                isCorrect = playerAnswer.toLowerCase() === currentQ.correctAnswer.toLowerCase() ||
+                           playerAnswer.toLowerCase() === currentQ.options[currentQ.correctAnswer].toLowerCase();
+            } else {
+                // Simple text matching (case-insensitive)
+                isCorrect = playerAnswer.toLowerCase().includes(currentQ.correctAnswer.toLowerCase()) ||
+                           currentQ.correctAnswer.toLowerCase().includes(playerAnswer.toLowerCase());
+            }
+            
+            // Update score
+            if (isCorrect) {
+                gameState.playerScores[gameState.currentUser.username] += gameState.quiz.correctPoints;
+                addBuzzLog(`${gameState.currentUser.name} answered correctly! (+${gameState.quiz.correctPoints} points)`, 'correct');
+            } else {
+                gameState.playerScores[gameState.currentUser.username] += gameState.quiz.wrongPoints;
+                addBuzzLog(`${gameState.currentUser.name} answered incorrectly. Answer was: ${currentQ.correctAnswer} (${gameState.quiz.wrongPoints} points)`, 'incorrect');
+            }
+            
+            updatePlayerScore();
+            updateMonitorScores();
+            
+            // Hide answer section
+            document.getElementById('answerSection').classList.add('hidden');
+            document.getElementById('playerAnswer').value = '';
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                nextQuestion();
+            }, 3000);
+        }
+
+        function enableBuzzers() {
+            document.getElementById('playerBuzzer').disabled = false;
+        }
+
+        function disableBuzzers() {
+            document.getElementById('playerBuzzer').disabled = true;
+        }
+
+        // Display Functions
+        function displayCurrentQuestion(question) {
+            // Update admin monitor
+            document.getElementById('monitorQuestion').innerHTML = `
+                <h3>Question ${gameState.quiz.currentQuestion + 1}</h3>
+                <p>${question.question}</p>
+            `;
+            
+            // Update player display
+            document.getElementById('currentQuestion').innerHTML = `
+                <h3>Question ${gameState.quiz.currentQuestion + 1}</h3>
+                <p>${question.question}</p>
+            `;
+            
+            // Show game area for players
+            document.getElementById('gameArea').classList.remove('hidden');
+            
+            // Handle options display
+            const monitorOptions = document.getElementById('monitorOptions');
+            const playerOptions = document.getElementById('questionOptions');
+            
+            if (question.type === 'mcq') {
+                const optionsHTML = `
+                    <div class="options-container">
+                        <div class="option-btn">A) ${question.options.A}</div>
+                        <div class="option-btn">B) ${question.options.B}</div>
+                        <div class="option-btn">C) ${question.options.C}</div>
+                        <div class="option-btn">D) ${question.options.D}</div>
+                    </div>
+                `;
+                monitorOptions.innerHTML = optionsHTML;
+                playerOptions.innerHTML = optionsHTML;
+            } else {
+                monitorOptions.innerHTML = '<p><em>Text answer question</em></p>';
+                playerOptions.innerHTML = '';
+            }
+        }
+
+        function updateGameStatus(message) {
+            document.getElementById('adminGameStatus').textContent = message;
+            document.getElementById('playerGameStatus').textContent = message;
+        }
+
+        function updatePlayerScore() {
+            if (gameState.currentUser) {
+                document.getElementById('playerScore').textContent = gameState.playerScores[gameState.currentUser.username] || 0;
+            }
+        }
+
+        function updateMonitorScores() {
+            const container = document.getElementById('monitorScores');
+            container.innerHTML = '';
+            
+            // Sort players by score
+            const sortedPlayers = gameState.quiz.players
+                .map(player => ({
+                    ...player,
+                    score: gameState.playerScores[player.username] || 0
+                }))
+                .sort((a, b) => b.score - a.score);
+            
+            sortedPlayers.forEach((player, index) => {
+                const scoreCard = document.createElement('div');
+                scoreCard.className = 'score-card';
+                if (index === 0 && player.score > 0) {
+                    scoreCard.classList.add('winner');
+                }
+                
+                scoreCard.innerHTML = `
+                    <h4>${player.name}</h4>
+                    <div class="timer">${player.score}</div>
+                    <small>${player.username}</small>
+                `;
+                container.appendChild(scoreCard);
+            });
+        }
+
+        function addBuzzLog(message, type = '') {
+            const buzzLog = document.getElementById('buzzLog');
+            const entry = document.createElement('div');
+            entry.className = 'buzz-entry';
+            if (type) entry.classList.add(type);
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `<small>${timestamp}</small><br>${message}`;
+            
+            buzzLog.insertBefore(entry, buzzLog.firstChild);
+            
+            // Keep only last 10 entries
+            while (buzzLog.children.length > 10) {
+                buzzLog.removeChild(buzzLog.lastChild);
+            }
+        }
+
+        function showLeaderboard() {
+            // Sort players by score for final leaderboard
+            const sortedPlayers = gameState.quiz.players
+                .map(player => ({
+                    ...player,
+                    score: gameState.playerScores[player.username] || 0
+                }))
+                .sort((a, b) => b.score - a.score);
+            
+            const leaderboardContainer = document.getElementById('leaderboardList');
+            leaderboardContainer.innerHTML = '';
+            
+            sortedPlayers.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                if (index === 0) {
+                    item.classList.add('winner');
+                }
+                
+                let medal = '';
+                if (index === 0) medal = '🥇';
+                else if (index === 1) medal = '🥈';
+                else if (index === 2) medal = '🥉';
+                else medal = `#${index + 1}`;
+                
+                item.innerHTML = `
+                    <div>
+                        <span style="font-size: 1.5rem; margin-right: 1rem;">${medal}</span>
+                        <strong>${player.name}</strong>
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: bold;">
+                        ${player.score} pts
+                    </div>
+                `;
+                leaderboardContainer.appendChild(item);
+            });
+            
+            // Show leaderboard for players
+            document.getElementById('leaderboard').classList.remove('hidden');
+            document.getElementById('gameArea').classList.add('hidden');
+            
+            // Update game status
+            if (sortedPlayers.length > 0) {
+                updateGameStatus(`🎉 ${sortedPlayers[0].name} wins with ${sortedPlayers[0].score} points! 🎉`);
+            }
+        }
+
+        // Initialize the application
+        function init() {
+            // Set up some demo data for testing
+            gameState.quiz.players = [
+                { id: 1, name: 'Alice Johnson', username: 'alice', password: 'alice123' },
+                { id: 2, name: 'Bob Smith', username: 'bob', password: 'bob123' },
+                { id: 3, name: 'Charlie Brown', username: 'charlie', password: 'charlie123' }
+            ];
+            
+            gameState.quiz.questions = [
+                {
+                    id: 1,
+                    question: 'What is the capital of France?',
+                    type: 'mcq',
+                    options: { A: 'London', B: 'Berlin', C: 'Paris', D: 'Madrid' },
+                    correctAnswer: 'C'
+                },
+                {
+                    id: 2,
+                    question: 'What is 2 + 2?',
+                    type: 'text',
+                    correctAnswer: '4'
+                },
+                {
+                    id: 3,
+                    question: 'Which planet is known as the Red Planet?',
+                    type: 'mcq',
+                    options: { A: 'Venus', B: 'Mars', C: 'Jupiter', D: 'Saturn' },
+                    correctAnswer: 'B'
+                }
+            ];
+            
+            // Initialize player scores
+            gameState.quiz.players.forEach(player => {
+                gameState.playerScores[player.username] = 0;
+            });
+            
+            // Auto-update monitor scores every 2 seconds
+            setInterval(() => {
+                if (gameState.quiz.isActive) {
+                    updateMonitorScores();
+                }
+            }, 2000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (!gameState.isAdmin && gameState.quiz.isActive && !gameState.buzzedPlayer) {
+                if (event.code === 'Space' || event.code === 'Enter') {
+                    event.preventDefault();
+                    buzz();
+                }
+            }
+        });
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
